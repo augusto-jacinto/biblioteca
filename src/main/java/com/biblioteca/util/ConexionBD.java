@@ -11,7 +11,7 @@ public class ConexionBD {
     static {
         try {
             Class.forName(DRIVER);
-            System.out.println("Driver JDBC cargado correctamente");
+            //System.out.println("Driver JDBC cargado correctamente");
         } catch (ClassNotFoundException e) {
             System.err.println("Error cargando el driver JDBC: " + e.getMessage());
             e.printStackTrace();
@@ -21,7 +21,7 @@ public class ConexionBD {
     public static Connection getConexion() {
         try {
             Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("Conexión a la base de datos exitosa");
+            //System.out.println("Conexión a la base de datos exitosa");
             return conn;
         } catch (SQLException e) {
             System.err.println("Error conectando a la base de datos: " + e.getMessage());

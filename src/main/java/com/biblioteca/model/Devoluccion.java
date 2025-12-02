@@ -68,4 +68,16 @@ public class Devoluccion {
         this.observacion = observacion;
         this.estado = true;
     }
+
+    @Override
+    public String toString() {
+        return "Devoluccion{" +
+                "idDevoluccion=" + idDevoluccion +
+                ", idPrestamo=" + idPrestamo +
+                ", idAdministrativo=" + idAdministrativo +
+                ", fechaDevoluccion=" + fechaDevoluccion +
+                ", observacion='" + observacion + '\'' +
+                ", estado=" + estado +
+                '}';
+    }
 }
