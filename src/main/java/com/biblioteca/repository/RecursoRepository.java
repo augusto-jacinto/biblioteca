@@ -105,12 +105,41 @@ public class RecursoRepository implements CRUDOperations<Recurso> {
 
     @Override
     public void eliminar(int id) {
-        String sql = "DELETE FROM Recurso WHERE idRecurso = ?";
+        // Primero verificar si el recurso tiene relaciones con DetallePrestamo
+        String sqlVerificar = "SELECT COUNT(*) as total FROM DetallePrestamo WHERE idRecurso = ?";
+
         try (Connection conn = ConexionBD.getConexion();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, id);
-            pstmt.executeUpdate();
-            System.out.println("Recurso eliminado exitosamente");
+             PreparedStatement pstmtVerificar = conn.prepareStatement(sqlVerificar)) {
+
+            pstmtVerificar.setInt(1, id);
+            ResultSet rs = pstmtVerificar.executeQuery();
+
+            if (rs.next()) {
+                int totalRelaciones = rs.getInt("total");
+
+                if (totalRelaciones > 0) {
+                    System.err.println("ADVERTENCIA: No se puede eliminar el recurso con ID " + id);
+                    System.err.println("El registro se encuentra relacionado en la tabla DetallePrestamo.");
+                    System.err.println("Total de relaciones encontradas: " + totalRelaciones);
+                    rs.close();
+                    return;
+                }
+            }
+            rs.close();
+
+            // Si no hay relaciones, proceder con la eliminación
+            String sql = "DELETE FROM Recurso WHERE idRecurso = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, id);
+                int filasAfectadas = pstmt.executeUpdate();
+
+                if (filasAfectadas > 0) {
+                    System.out.println("Recurso eliminado exitosamente");
+                } else {
+                    System.err.println("No se encontró el recurso con ID " + id);
+                }
+            }
+
         } catch (SQLException e) {
             System.err.println("Error eliminando recurso: " + e.getMessage());
             e.printStackTrace();
