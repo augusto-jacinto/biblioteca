@@ -104,7 +104,7 @@ public class PrestamoRepository implements CRUDOperations<Prestamo> {
 
     @Override
     public void eliminar(int id) {
-        String sql = "UPDATE Prestamo SET estado = 0 WHERE idPrestamo = ?";
+        String sql = "DELETE FROM Prestamo WHERE idPrestamo = ?";
         try (Connection conn = ConexionBD.getConexion();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);

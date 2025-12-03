@@ -142,16 +142,34 @@ public class AdministrativoRepository implements CRUDOperations<Administrativo> 
 
     @Override
     public void eliminar(int id) {
-        String sql = "UPDATE Administrativo SET estado = 0 WHERE idAdministrativo = ?";
-        String sqlPersona = "UPDATE Persona SET estado = 0 WHERE idPersona = (SELECT idPersona FROM Administrativo WHERE idAdministrativo = ?)";
+        String sqlAdministrativo = "DELETE FROM Administrativo WHERE idAdministrativo = ?";
         try (Connection conn = ConexionBD.getConexion()) {
             conn.setAutoCommit(false);
-            try (PreparedStatement pstmt1 = conn.prepareStatement(sql);
-                 PreparedStatement pstmt2 = conn.prepareStatement(sqlPersona)) {
-                pstmt1.setInt(1, id);
-                pstmt1.executeUpdate();
-                pstmt2.setInt(1, id);
-                pstmt2.executeUpdate();
+            try {
+                int idPersona = 0;
+                String sqlGetPersona = "SELECT idPersona FROM Administrativo WHERE idAdministrativo = ?";
+                try (PreparedStatement pstmt = conn.prepareStatement(sqlGetPersona)) {
+                    pstmt.setInt(1, id);
+                    ResultSet rs = pstmt.executeQuery();
+                    if (rs.next()) {
+                        idPersona = rs.getInt("idPersona");
+                    }
+                    rs.close();
+                }
+
+                try (PreparedStatement pstmt = conn.prepareStatement(sqlAdministrativo)) {
+                    pstmt.setInt(1, id);
+                    pstmt.executeUpdate();
+                }
+
+                if (idPersona > 0) {
+                    String sqlDeletePersona = "DELETE FROM Persona WHERE idPersona = ?";
+                    try (PreparedStatement pstmt = conn.prepareStatement(sqlDeletePersona)) {
+                        pstmt.setInt(1, idPersona);
+                        pstmt.executeUpdate();
+                    }
+                }
+
                 conn.commit();
                 System.out.println("Administrativo eliminado exitosamente");
             } catch (SQLException e) {

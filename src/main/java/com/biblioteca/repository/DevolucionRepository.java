@@ -98,7 +98,7 @@ public class DevolucionRepository implements CRUDOperations<Devoluccion> {
 
     @Override
     public void eliminar(int id) {
-        String sql = "UPDATE Devoluccion SET estado = 0 WHERE idDevoluccion = ?";
+        String sql = "DELETE FROM Devoluccion WHERE idDevoluccion = ?";
         try (Connection conn = ConexionBD.getConexion();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);

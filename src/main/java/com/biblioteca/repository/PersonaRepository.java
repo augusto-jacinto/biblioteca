@@ -108,7 +108,7 @@ public class PersonaRepository implements CRUDOperations<Persona> {
 
     @Override
     public void eliminar(int id) {
-        String sql = "UPDATE Persona SET estado = 0 WHERE idPersona = ?";
+        String sql = "DELETE FROM Persona WHERE idPersona = ?";
         try (Connection conn = ConexionBD.getConexion();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);

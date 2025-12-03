@@ -105,7 +105,7 @@ public class RecursoRepository implements CRUDOperations<Recurso> {
 
     @Override
     public void eliminar(int id) {
-        String sql = "UPDATE Recurso SET estado = 0 WHERE idRecurso = ?";
+        String sql = "DELETE FROM Recurso WHERE idRecurso = ?";
         try (Connection conn = ConexionBD.getConexion();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);

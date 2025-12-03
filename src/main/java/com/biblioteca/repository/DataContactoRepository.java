@@ -93,7 +93,7 @@ public class DataContactoRepository implements CRUDOperations<DataContacto> {
 
     @Override
     public void eliminar(int id) {
-        String sql = "UPDATE DataContacto SET estado = 0 WHERE idPersonaContacto = ?";
+        String sql = "DELETE FROM DataContacto WHERE idPersonaContacto = ?";
         try (Connection conn = ConexionBD.getConexion();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);

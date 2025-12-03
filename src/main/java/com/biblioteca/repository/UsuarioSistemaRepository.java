@@ -141,12 +141,41 @@ public class UsuarioSistemaRepository implements CRUDOperations<UsuarioSistema> 
 
     @Override
     public void eliminar(int id) {
-        String sql = "UPDATE Persona SET estado = 0 WHERE idPersona = (SELECT idPersona FROM UsuarioSistema WHERE idUsuario = ?)";
-        try (Connection conn = ConexionBD.getConexion();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, id);
-            pstmt.executeUpdate();
-            System.out.println("Usuario del sistema eliminado exitosamente");
+        String sqlUsuario = "DELETE FROM UsuarioSistema WHERE idUsuario = ?";
+        String sqlPersona = "DELETE FROM Persona WHERE idPersona = (SELECT idPersona FROM UsuarioSistema WHERE idUsuario = ?)";
+        try (Connection conn = ConexionBD.getConexion()) {
+            conn.setAutoCommit(false);
+            try {
+                int idPersona = 0;
+                String sqlGetPersona = "SELECT idPersona FROM UsuarioSistema WHERE idUsuario = ?";
+                try (PreparedStatement pstmt = conn.prepareStatement(sqlGetPersona)) {
+                    pstmt.setInt(1, id);
+                    ResultSet rs = pstmt.executeQuery();
+                    if (rs.next()) {
+                        idPersona = rs.getInt("idPersona");
+                    }
+                    rs.close();
+                }
+
+                try (PreparedStatement pstmt = conn.prepareStatement(sqlUsuario)) {
+                    pstmt.setInt(1, id);
+                    pstmt.executeUpdate();
+                }
+
+                if (idPersona > 0) {
+                    String sqlDeletePersona = "DELETE FROM Persona WHERE idPersona = ?";
+                    try (PreparedStatement pstmt = conn.prepareStatement(sqlDeletePersona)) {
+                        pstmt.setInt(1, idPersona);
+                        pstmt.executeUpdate();
+                    }
+                }
+
+                conn.commit();
+                System.out.println("Usuario del sistema eliminado exitosamente");
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             System.err.println("Error eliminando usuario del sistema: " + e.getMessage());
             e.printStackTrace();

@@ -141,16 +141,34 @@ public class ProfesorRepository implements CRUDOperations<Profesor> {
 
     @Override
     public void eliminar(int id) {
-        String sql = "UPDATE Profesor SET estado = 0 WHERE idProfesor = ?";
-        String sqlPersona = "UPDATE Persona SET estado = 0 WHERE idPersona = (SELECT idPersona FROM Profesor WHERE idProfesor = ?)";
+        String sqlProfesor = "DELETE FROM Profesor WHERE idProfesor = ?";
         try (Connection conn = ConexionBD.getConexion()) {
             conn.setAutoCommit(false);
-            try (PreparedStatement pstmt1 = conn.prepareStatement(sql);
-                 PreparedStatement pstmt2 = conn.prepareStatement(sqlPersona)) {
-                pstmt1.setInt(1, id);
-                pstmt1.executeUpdate();
-                pstmt2.setInt(1, id);
-                pstmt2.executeUpdate();
+            try {
+                int idPersona = 0;
+                String sqlGetPersona = "SELECT idPersona FROM Profesor WHERE idProfesor = ?";
+                try (PreparedStatement pstmt = conn.prepareStatement(sqlGetPersona)) {
+                    pstmt.setInt(1, id);
+                    ResultSet rs = pstmt.executeQuery();
+                    if (rs.next()) {
+                        idPersona = rs.getInt("idPersona");
+                    }
+                    rs.close();
+                }
+
+                try (PreparedStatement pstmt = conn.prepareStatement(sqlProfesor)) {
+                    pstmt.setInt(1, id);
+                    pstmt.executeUpdate();
+                }
+
+                if (idPersona > 0) {
+                    String sqlDeletePersona = "DELETE FROM Persona WHERE idPersona = ?";
+                    try (PreparedStatement pstmt = conn.prepareStatement(sqlDeletePersona)) {
+                        pstmt.setInt(1, idPersona);
+                        pstmt.executeUpdate();
+                    }
+                }
+
                 conn.commit();
                 System.out.println("Profesor eliminado exitosamente");
             } catch (SQLException e) {

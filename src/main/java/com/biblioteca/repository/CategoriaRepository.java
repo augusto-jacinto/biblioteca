@@ -89,7 +89,7 @@ public class CategoriaRepository implements CRUDOperations<Categoria> {
 
     @Override
     public void eliminar(int id) {
-        String sql = "UPDATE Categoria SET estado = 0 WHERE idCategoria = ?";
+        String sql = "DELETE FROM Categoria WHERE idCategoria = ?";
         try (Connection conn = ConexionBD.getConexion();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
